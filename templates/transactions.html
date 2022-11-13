@@ -1,0 +1,12 @@
+{# templates/transactions.html #}
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<ol>
+    {% for entry in entries %}
+        <li>{{entry[2]}}: {{entry[1]}} on {{entry[0]}}.</li>
+    {% endfor %}
+</ol>
+{% endblock content %}
