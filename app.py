@@ -9,6 +9,9 @@ from flask import Flask, render_template, request
 #create an object that allows us to listen / respond to incoming requests
 app = Flask(__name__)
 
+# added to help support AWS EBS deployment
+application = app
+
 #create a python list to store data in-memory for now
 # transactions = [
 #     ("2022-08-25", 70.00, "Checking"),
