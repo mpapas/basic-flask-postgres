@@ -12,4 +12,4 @@ env_variables:
   DATABASE_PASSWORD: ''
 
 vpc_access_connector:
-  name: <name>
+  name: projects/<project-id>/locations/<region>/connectors/<serverless-vpc-name>
