@@ -1,0 +1,15 @@
+runtime: python37
+entrypoint: gunicorn -b :$PORT app:app
+
+# Note: Saving credentials in environment variables is convenient, but not
+# secure - consider a more secure solution such as
+# Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+# keep secrets safe.
+env_variables:
+  DATABASE_HOST: ''
+  DATABASE_NAME: 'transactions'
+  DATABASE_USER: 'postgres'
+  DATABASE_PASSWORD: ''
+
+vpc_access_connector:
+  name: <name>
