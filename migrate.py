@@ -19,5 +19,5 @@ def migrate_db(db: pool.ThreadedConnectionPool) -> None:
             print("Table already exists")
             pass
 
-    connection.close()
+    db.putconn(connection)
     

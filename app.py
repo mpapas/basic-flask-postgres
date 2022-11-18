@@ -61,7 +61,7 @@ def home():
                     request.form.get("account"),
                 ))
 
-        connection.close()
+        db.putconn(connection)
 
     context = {
         "title": "Add transaction"
@@ -80,7 +80,7 @@ def show_transactions():
             cursor.execute("SELECT * FROM transactions;")
             transactions = cursor.fetchall()
 
-    connection.close()
+    db.putconn(connection)
 
     context = {
         "title": "Transactions",
