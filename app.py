@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 #import the flask class from the Flask package
 from flask import Flask, render_template, request
+from connect_tcp import init_connection_pool
+from migrate import migrate_db
 
 #create an object that allows us to listen / respond to incoming requests
 app = Flask(__name__)
@@ -19,24 +21,12 @@ application = app
 #     ("2022-08-25", 15.34, "Checking"),
 # ]
 
-host = os.environ["DATABASE_HOST"]
-dbname = os.environ["DATABASE_NAME"]
-user = os.environ["DATABASE_USER"]
-password = os.environ["DATABASE_PASSWORD"]
-sslmode = "require"
+# initiate a connection pool to a Cloud SQL database
+global db
+db = init_connection_pool()
 
-# Construct connection string
-
-conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
-connection = psycopg2.connect(conn_string)
-print("Connection established")
-
-try:
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute("CREATE TABLE transactions (date TEXT, amount REAL, account TEXT);")
-except psycopg2.errors.DuplicateTable:
-    pass
+# creates required 'votes' table in database (if it does not exist)
+migrate_db(db)
 
 #register an endpoint using a decorator and specify how to respond
 # @app.route("/")
@@ -60,7 +50,9 @@ def home():
         #         request.form.get("account"),
         #     )
         # )
-
+        
+        connection = db.getconn()
+        
         with connection:
             with connection.cursor() as cursor:
                 cursor.execute("INSERT INTO transactions VALUES (%s, %s, %s);", (
@@ -69,21 +61,30 @@ def home():
                     request.form.get("account"),
                 ))
 
+        connection.close()
+
     context = {
         "title": "Add transaction"
     }
+
     return render_template("form.html", **context)
 
 
 @app.route("/transactions", methods=["GET"])
 def show_transactions():
+    
+    connection = db.getconn()
+
     with connection:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM transactions;")
             transactions = cursor.fetchall()
 
+    connection.close()
+
     context = {
         "title": "Transactions",
         "entries": transactions
     }
+    
     return render_template("transactions.html", **context)

@@ -134,3 +134,4 @@ local.*
 .vscode
 *.zip
 app.yaml
+*.pem
