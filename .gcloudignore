@@ -19,3 +19,5 @@ __pycache__/
 /setup.cfg
 .venv
 .example
+.theia
+.vscode

@@ -49,6 +49,13 @@ def connect_tcp_socket():
     max_connections = 5
     
     if os.environ.get("DATABASE_ROOT_CERT"):
+        
+        path_to_current_directory = os.path.dirname(os.path.abspath(__file__))
+
+        SSL_ROOT_CERT = os.path.join(path_to_current_directory, os.environ["DATABASE_ROOT_CERT"])
+        SSL_CLIENT_CERT = os.path.join(path_to_current_directory, os.environ["DATABASE_CLIENT_CERT"])
+        SSL_CLIENT_KEY = os.path.join(path_to_current_directory, os.environ["DATABASE_CLIENT_KEY"])
+        
         connection_pool = psycopg2.pool.ThreadedConnectionPool(min_connections, 
             max_connections, 
             user=user,
@@ -57,9 +64,9 @@ def connect_tcp_socket():
             port="5432",
             database=dbname,
             sslmode="require",
-            sslrootcert=os.environ["DATABASE_ROOT_CERT"],
-            sslcert=os.environ["DATABASE_CLIENT_CERT"],
-            sslkey=os.environ["DATABASE_CLIENT_KEY"]
+            sslrootcert=SSL_ROOT_CERT,
+            sslcert=SSL_CLIENT_CERT,
+            sslkey=SSL_CLIENT_KEY
             )
     else:
         connection_pool = psycopg2.pool.ThreadedConnectionPool(min_connections, 
