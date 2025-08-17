@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from connect_tcp import init_connection_pool
 from migrate import migrate_db
+from contextlib import contextmanager
 
 #create an object that allows us to listen / respond to incoming requests
 app = Flask(__name__)
@@ -18,6 +19,17 @@ application = app
 # initiate a connection pool to a Cloud SQL database
 global db
 db = init_connection_pool()
+
+
+@contextmanager
+def get_connection():
+    """Yield a database connection and always return it to the pool."""
+    connection = db.getconn()
+    try:
+        yield connection
+    finally:
+        db.putconn(connection)
+
 
 # creates required 'votes' table in database (if it does not exist)
 migrate_db(db)
@@ -45,17 +57,17 @@ def home():
         #     )
         # )
         
-        connection = db.getconn()
-        
-        with connection:
-            with connection.cursor() as cursor:
-                cursor.execute("INSERT INTO transactions VALUES (%s, %s, %s);", (
-                    request.form.get("date"),
-                    float(request.form.get("amount")),
-                    request.form.get("account"),
-                ))
-
-        db.putconn(connection)
+        with get_connection() as connection:
+            with connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "INSERT INTO transactions VALUES (%s, %s, %s);",
+                        (
+                            request.form.get("date"),
+                            float(request.form.get("amount")),
+                            request.form.get("account"),
+                        ),
+                    )
 
     context = {
         "title": "Add transaction"
@@ -67,14 +79,11 @@ def home():
 @app.route("/transactions", methods=["GET"])
 def show_transactions():
     
-    connection = db.getconn()
-
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM transactions;")
-            transactions = cursor.fetchall()
-
-    db.putconn(connection)
+    with get_connection() as connection:
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM transactions;")
+                transactions = cursor.fetchall()
 
     context = {
         "title": "Transactions",
