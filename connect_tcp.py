@@ -3,6 +3,15 @@ import psycopg2
 from psycopg2 import pool
 from dotenv import load_dotenv
 
+# Load environment variables from a .env file if present. The database
+# connection parameters below are read at import time, so it's important that
+# they are populated before attempting to access them. Previously the values
+# were read from os.environ without first loading the .env file, which caused
+# KeyError exceptions when running the application locally without exporting
+# the variables. Calling ``load_dotenv`` ensures that the expected variables are
+# available.
+load_dotenv()
+
 host = os.environ["DATABASE_HOST"]
 dbname = os.environ["DATABASE_NAME"]
 user = os.environ["DATABASE_USER"]
